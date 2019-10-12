@@ -1,0 +1,82 @@
+# Python app to send emails (with/without) attachments,
+# and coded in html to multiple users in a list
+# stored in csv format!
+
+import smtplib
+import config
+import pandas as pd
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+# from email.mime.base import MIMEBase
+# from email import encoders
+
+# importing and indexing the data from csv file into a pandas data frame
+email_data = pd.read_csv("D:\SidLabs\Main\SidLabs_AI\P4ML\RITEE_Raipur\Raw Files\elist.csv")
+email_list = email_data["Email"]
+
+
+# This is a test break
+# print(email_list)
+
+# This function executes the code to send emails to the 'to_email' string
+# with the 'content' argument containing all parts of the message
+def send_email(content, to_email):
+    try:
+        server = smtplib.SMTP('smtp.gmail.com:587')
+        server.ehlo()
+        server.starttls()
+        # Sender's credentials are fed in from the config.py file
+        server.login(config.EMAIL_ADDRESS, config.PASSWORD)
+        message = content.as_string()
+        server.sendmail(config.EMAIL_ADDRESS, to_email, message)
+        server.quit()
+        print("Email Sending Complete: \nYour email has been sent to:\n>", to_email, "successfully.")
+    except:
+        print("Email Sending Error: \n Email failed to the email address: \n>", to_email, " .")
+
+# Code to attach the text/Html text body to the message
+# MIMEMultipart signifies that the message has multiple parts
+msg = MIMEMultipart()
+# storing data into the parts of the message to be sent
+msg['From'] = config.EMAIL_ADDRESS
+msg['Subject'] = "This is a test mail from SidLabs"
+# MIMEText is used to code in HTML structures within the body of the message
+body = MIMEText(
+    '<HTML><body><h2> Hello Friends!\n</h2>' +
+    '<h2> This is a test, Plz ignore </h2>' +
+    '<h3> Cheers!!! </h3>' +
+    '<a href= "https://www.proexcellers.com/"> Team ProEx </a>' +
+    '</body></html>', 'html', 'utf-8'
+)
+msg.attach(body)
+
+
+# Code to attach a file as an attachment to the message
+# filename = "Ad#3_java-course.jpg"
+#
+# attachment = open("D:\Ad#3_java-course.jpg", "rb")
+
+# p = MIMEBase('application', 'octate-stream')
+#
+# p.set_payload(attachment.read())
+#
+# encoders.encode_base64(p)
+#
+# p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+#
+# msg.attach(p)
+
+
+# Driver code which picks up one email at a time from the csv file
+# and passes it to the send_email function with the
+# message of the email and the email address
+for i in range(0, 100):
+    try:
+        send_email(msg, str((email_list[i])))
+        i = +1
+    except:
+        print("\n> The app has reached till the end of the list,"
+              "\n> There are no more email addresses in this list."
+              "\n> ********************** This task is done!")
+        quit()
